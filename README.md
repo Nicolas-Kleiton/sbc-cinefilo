@@ -148,8 +148,8 @@ seu efeito é justamente colocá-lo nesse estado.
 
 ## Casos de teste
 
-Os três casos estão nas células 16 a 18 do notebook, cada um com a saída esperada comentada e
-verificada por asserções sobre o conjunto de regras disparadas e sobre a consulta gerada. Ambos são
+Os três casos estão na seção 6 do notebook, cada um com a saída esperada comentada e
+verificada por asserções sobre o conjunto de regras disparadas e sobre a consulta gerada. Todos são
 determinísticos; apenas os filmes devolvidos pela TMDB variam ao longo do tempo.
 
 ### Caso 1 — família com crianças
@@ -205,7 +205,7 @@ vote_count.gte=200              primary_release_date.lte=1999-12-31
 
 ### Verificações globais
 
-A célula 19 acrescenta três asserções sobre o conjunto dos casos: nenhuma regra dispara mais de uma
+A última célula da seção 6 acrescenta três asserções sobre o conjunto dos casos: nenhuma regra dispara mais de uma
 vez em uma mesma execução, as doze regras são exercitadas por ao menos um dos casos, e todas as
 execuções percorrem os três níveis.
 
