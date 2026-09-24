@@ -85,19 +85,19 @@ faixa de largura zero não devolveria filme nenhum. *(nível 2, salience 0)*
 **R9.** Se a sessão é de um casal sem restrição infantil, o humor é rir ou emocionar, e romance ainda
 não está entre os gêneros, então romance é acrescentado. *(nível 2, salience 5)*
 
-**R11.** Se a busca é por clássicos e o mínimo de votos exigido está acima de 200, então o mínimo cai
+**R10.** Se a busca é por clássicos e o mínimo de votos exigido está acima de 200, então o mínimo cai
 para 200. *(nível 2, salience 5)*
 
-**R12.** Se a sessão é longa (duração máxima de 150 minutos ou mais) e o piso de duração ainda é o
+**R11.** Se a sessão é longa (duração máxima de 150 minutos ou mais) e o piso de duração ainda é o
 padrão, então o piso sobe para 90 minutos. *(nível 2, salience 5)*
 
-**R10.** Se classificação, gêneros, duração, período e critério já estão definidos e nenhuma consulta
+**R12.** Se classificação, gêneros, duração, período e critério já estão definidos e nenhuma consulta
 foi montada, então monta-se a consulta à TMDB com todos esses parâmetros. *(nível 3, salience −50)*
 
 As duas últimas regras do nível 2 existem porque um critério estabelecido no nível 1 pode ficar
-inadequado depois que outra decisão é tomada. A R11 corrige o mínimo de votos: exigir mil avaliações
+inadequado depois que outra decisão é tomada. A R10 corrige o mínimo de votos: exigir mil avaliações
 faz sentido para lançamentos recentes, mas descarta clássicos legítimos, que circularam antes da
-TMDB existir. A R12 corrige o piso de duração: quem separou três horas para uma sessão provavelmente
+TMDB existir. A R11 corrige o piso de duração: quem separou três horas para uma sessão provavelmente
 não quer um filme de setenta minutos.
 
 ### Encadeamento em três níveis
@@ -106,14 +106,14 @@ O encadeamento não é decorativo: nenhuma execução chega ao resultado sem atr
 
 - **Nível 1 (R1 a R6)** lê apenas o fato `Sessao` e produz `Restricao`, `Genero`, `Periodo` e
   `Criterio`.
-- **Nível 2 (R7, R8, R9, R11, R12)** lê fatos produzidos no nível 1. A R8 depende de `Restricao` para
-  criar `Duracao`; R7 e R9 corrigem `Genero` à luz da classificação já decidida; R11 corrige
-  `Criterio` à luz de `Periodo`; R12 corrige a `Duracao` que a própria R8 acabou de criar.
-- **Nível 3 (R10)** depende de `Duracao`, que só passa a existir depois do nível 2.
+- **Nível 2 (R7, R8, R9, R10, R11)** lê fatos produzidos no nível 1. A R8 depende de `Restricao` para
+  criar `Duracao`; R7 e R9 corrigem `Genero` à luz da classificação já decidida; R10 corrige
+  `Criterio` à luz de `Periodo`; R11 corrige a `Duracao` que a própria R8 acabou de criar.
+- **Nível 3 (R12)** depende de `Duracao`, que só passa a existir depois do nível 2.
 
 Vale notar que "nível" descreve dependência entre regras, não ordem de disparo. No trace é comum ver
 uma regra de nível 2 disparar antes de uma de nível 1 que ainda estava pendente na agenda — o que
-importa é que a R10 jamais dispara antes que seus cinco fatos de entrada existam.
+importa é que a R12 jamais dispara antes que seus cinco fatos de entrada existam.
 
 ### Resolução de conflito
 
@@ -125,8 +125,8 @@ As regras padrão (R2 e R6) têm salience −10 e condição negativa: `NOT(Rest
 10 — o fato passa a existir e a ativação da regra padrão é removida da agenda antes de chegar a vez
 dela. O resultado é que nunca coexistem duas classificações nem dois critérios de ordenação.
 
-**Conclusão adiada até o fim.** A R10 tem salience −50, abaixo de todas as outras. Isso garante que a
-consulta só seja montada depois que R7, R9, R11 e R12 já tenham feito seus ajustes, e não com valores
+**Conclusão adiada até o fim.** A R12 tem salience −50, abaixo de todas as outras. Isso garante que a
+consulta só seja montada depois que R7, R9, R10 e R11 já tenham feito seus ajustes, e não com valores
 intermediários.
 
 O notebook torna isso observável: a função `mostrar_agenda` imprime o conjunto de conflito antes da
@@ -142,9 +142,9 @@ seu efeito é justamente colocá-lo nesse estado.
 |---|---|---|
 | R7 | há gênero impróprio na lista | produz lista sem nenhum |
 | R9 | romance ausente | produz lista com romance |
-| R11 | mínimo de votos acima de 200 | grava exatamente 200 |
-| R12 | piso de duração abaixo de 90 | grava exatamente 90 |
-| R10 | `NOT(Consulta())` | cria o fato `Consulta` |
+| R10 | mínimo de votos acima de 200 | grava exatamente 200 |
+| R11 | piso de duração abaixo de 90 | grava exatamente 90 |
+| R12 | `NOT(Consulta())` | cria o fato `Consulta` |
 
 ## Casos de teste
 
@@ -158,10 +158,10 @@ Entrada: família, com crianças, 120 minutos, humor "medo", época indiferente.
 
 Exercita o caminho infantil completo. R1 impõe classificação Livre e cancela R2; R5 impõe ordenação
 por popularidade e cancela R6. R3 seleciona terror a partir do humor, e R7 o substitui por animação,
-família e aventura. R8 reduz a duração de 120 para 100 minutos apesar do tempo disponível. R11 e R12
+família e aventura. R8 reduz a duração de 120 para 100 minutos apesar do tempo disponível. R10 e R11
 não se aplicam: a época é indiferente e a sessão não é longa.
 
-Regras disparadas: R1, R3, R4, R5, R7, R8, R10.
+Regras disparadas: R1, R3, R4, R5, R7, R8, R12.
 
 ```
 with_genres=16|10751|12         certification.lte=L (BR)
@@ -175,9 +175,9 @@ Entrada: casal, sem crianças, 150 minutos, humor "emocionar", filmes recentes.
 
 Exercita as duas regras padrão, a regra de romance e a de sessão longa. Sem crianças, R1 não dispara
 e R2 assume a sessão adulta; sem sessão em grupo, R5 não dispara e R6 assume a ordenação por
-avaliação. R3 seleciona drama e R9 acrescenta romance. R12 eleva o piso de duração para 90 minutos.
+avaliação. R3 seleciona drama e R9 acrescenta romance. R11 eleva o piso de duração para 90 minutos.
 
-Regras disparadas: R2, R3, R4, R6, R8, R9, R12, R10.
+Regras disparadas: R2, R3, R4, R6, R8, R9, R11, R12.
 
 ```
 with_genres=18|10749            sem filtro de classificação
@@ -191,11 +191,11 @@ primary_release_date.gte=<ano atual − 5>-01-01
 Entrada: sozinho, sem crianças, 110 minutos, humor "adrenalina", clássicos.
 
 Exercita a regra de clássicos e serve de controle para as regras de ajuste que não devem disparar.
-R11 detecta que o critério herdado de R6 exige mil votos e o reduz para 200. R7 não se aplica porque
-não há restrição infantil, R9 porque não é casal, e R12 porque a sessão não é longa. Os gêneros
+R10 detecta que o critério herdado de R6 exige mil votos e o reduz para 200. R7 não se aplica porque
+não há restrição infantil, R9 porque não é casal, e R11 porque a sessão não é longa. Os gêneros
 selecionados por R3 chegam intactos à consulta.
 
-Regras disparadas: R2, R3, R4, R6, R8, R11, R10.
+Regras disparadas: R2, R3, R4, R6, R8, R10, R12.
 
 ```
 with_genres=28|53               with_runtime.gte=60
@@ -216,15 +216,15 @@ Caso 1:
 
 ```
 TRACE (ordem de disparo)
- 1. [R5 | nível 1] Sessão em grupo → ordenar por popularidade.
- 2. [R1 | nível 1] Há crianças → classificação máxima L.
+ 1. [R1 | nível 1] Há crianças → classificação máxima L.
+ 2. [R5 | nível 1] Sessão em grupo → ordenar por popularidade.
  3. [R8 | nível 2] 120 min disponíveis, mas com classificação L o limite é 100 min.
- 4. [R4 | nível 1] Época 'tanto_faz' → filmes qualquer ano.
- 5. [R3 | nível 1] Humor 'medo' → gêneros base: Terror.
- 6. [R7 | nível 2] Classificação L proíbe Terror → gêneros passam a ser Animação, Família, Aventura.
- 7. [R10| nível 3] Todos os critérios definidos → consulta TMDB montada.
+ 4. [R3 | nível 1] Humor 'medo' → gêneros base: Terror.
+ 5. [R7 | nível 2] Classificação L proíbe Terror → gêneros passam a ser Animação, Família, Aventura.
+ 6. [R4 | nível 1] Época 'tanto_faz' → filmes qualquer ano.
+ 7. [R12| nível 3] Todos os critérios definidos → consulta TMDB montada.
 
-Regras que NÃO dispararam: R2, R6, R9, R11, R12
+Regras que NÃO dispararam: R2, R6, R9, R10, R11
 
 EXPLICAÇÃO DAS DECISÕES
 • Classificação máxima L, porque R1 disparou.
@@ -232,13 +232,13 @@ EXPLICAÇÃO DAS DECISÕES
 • Duração entre 60 e 100 min, porque R1 e R8 dispararam.
 • Lançamento: qualquer ano, porque R4 disparou.
 • Ordenação: mais populares, porque R5 disparou.
-• Consulta final à TMDB, porque R1, R3, R4, R5, R7, R8 e R10 dispararam.
+• Consulta final à TMDB, porque R1, R3, R4, R5, R7, R8 e R12 dispararam.
 ```
 
 O trace mostra a ordem em que o motor agiu; a explicação parte de cada decisão e recupera a cadeia
 que a sustenta. A segunda linha da explicação ilustra bem o encadeamento: a escolha dos gêneros
 depende de R3, mas também de R1, que foi quem tornou a R7 aplicável. O mesmo vale no Caso 3, onde a
-ordenação é justificada por R4, R6 e R11 — a época escolhida acabou influenciando o critério de
+ordenação é justificada por R4, R6 e R10 — a época escolhida acabou influenciando o critério de
 qualidade.
 
 ## Como executar
