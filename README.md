@@ -78,7 +78,9 @@ filmes mais bem avaliados. *(nível 1, salience −10 — regra padrão)*
 aventura. *(nível 2, salience 5)*
 
 **R8.** Se o tempo disponível é T e a classificação é C, então a duração aceitável vai de 60 minutos
-até T, com T limitado a 100 minutos quando C é Livre. *(nível 2, salience 0)*
+até T, com T limitado a 100 minutos quando C é Livre. Se essa faixa ficaria estreita demais — o caso
+de quem informa pouco tempo —, o piso recua para manter pelo menos 30 minutos de largura, porque uma
+faixa de largura zero não devolveria filme nenhum. *(nível 2, salience 0)*
 
 **R9.** Se a sessão é de um casal sem restrição infantil, o humor é rir ou emocionar, e romance ainda
 não está entre os gêneros, então romance é acrescentado. *(nível 2, salience 5)*
